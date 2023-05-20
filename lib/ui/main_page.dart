@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import 'package:weather_app/common/style.dart';
 import 'package:weather_app/data/api/api_service.dart';
 import 'package:weather_app/data/model/region.dart';
-import 'package:weather_app/data/model/weather.dart';
+import 'package:weather_app/widget/weather_screen.dart';
 
 class MainPage extends StatefulWidget {
   const MainPage({super.key});
@@ -27,15 +26,12 @@ class _MainPageState extends State<MainPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: customBlueColor,
         elevation: 0,
         title: const Center(
-          child: Text(
-            'Weather',
-            style: TextStyle(
-              color: customBlueColor,
-              fontSize: 18,
-            ),
+          child: Icon(
+            Icons.sunny,
+            color: Colors.white,
           ),
         ),
       ),
@@ -54,75 +50,49 @@ class _MainPageState extends State<MainPage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    DropdownButton<Region>(
-                        elevation: 8,
-                        underline: Container(
-                          height: 2,
-                          color: customBlueColor,
+                    Center(
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                        decoration: BoxDecoration(
+                          color: Colors.grey[200],
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            width: 1.0,
+                            color: Colors.grey[400]!,
+                          ),
                         ),
-                        value: selectedRegion ?? snapshot.data![0],
-                        items: snapshot.data!.map((item) {
-                          return DropdownMenuItem<Region>(
-                            value: item,
-                            child: Text(item.kota),
-                          );
-                        }).toList(),
-                        onChanged: (value) {
-                          setState(() {
-                            selectedRegion = value;
-                            id = selectedRegion!.id;
-                          });
-                        }),
+                        child: DropdownButton<Region>(
+                            hint: const Text('Pilih Kota Anda'),
+                            style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: Colors.black),
+                            underline: Container(),
+                            icon: const Icon(Icons.keyboard_arrow_down),
+                            value: selectedRegion,
+                            items: snapshot.data!.map((item) {
+                              return DropdownMenuItem<Region>(
+                                value: item,
+                                child: Text(item.kota),
+                              );
+                            }).toList(),
+                            onChanged: (value) {
+                              setState(() {
+                                selectedRegion = value;
+                                id = selectedRegion!.id;
+                              });
+                            }),
+                      ),
+                    ),
                     const SizedBox(
                       height: 32,
                     ),
-                    Expanded(
-                      child: FutureBuilder<List<Weather>>(
-                        future: ApiService().weatherDetails(id ?? '501397'),
-                        builder: (context,
-                            AsyncSnapshot<List<Weather>> snapshotWeather) {
-                          if (snapshotWeather.hasData) {
-                            return ListView.builder(
-                              itemCount: snapshotWeather.data!.length,
-                              itemBuilder: (context, index) {
-                                var detailWeather =
-                                    snapshotWeather.data![index];
-                                return Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                        "Waktu : ${(DateFormat('dd-MM-yyyy HH:mm').format(detailWeather.jamCuaca))}"),
-                                    Text("Cuaca : ${detailWeather.cuaca}"),
-                                    Text("Suhu : ${detailWeather.tempC} C"),
-                                    const SizedBox(
-                                      height: 16,
-                                    ),
-                                  ],
-                                );
-                              },
-                            );
-                          } else if (snapshotWeather.hasError) {
-                            return Center(
-                              child: Text(snapshotWeather.error.toString()),
-                            );
-                          } else {
-                            return const Center(
-                              child: Text(''),
-                            );
-                          }
-                        },
-                      ),
-                    )
+                    (id != null) ? WeatherScreen(id: id!) : const SizedBox()
                   ],
                 ),
               );
-            } else if (snapshot.hasError) {
-              return Center(
-                child: Text(snapshot.error.toString()),
-              );
             } else {
               return const Center(
-                child: Text(''),
+                child: Text('Terjadi sebuah kesalahan, silahkan coba lagi!'),
               );
             }
           }

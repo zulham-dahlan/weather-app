@@ -1,6 +1,3 @@
-import 'dart:convert';
-import 'dart:io';
-
 import 'package:http/http.dart' as http;
 import 'package:weather_app/data/model/region.dart';
 import 'package:weather_app/data/model/weather.dart';
@@ -27,7 +24,6 @@ class ApiService {
     if (response.statusCode == 200) {
       return weatherFromJson(response.body);
     } else {
-      print('$_baseUrl$_weatherDetails.json');
       throw Exception('Failed to Load Weather Detail');
     }
   }
